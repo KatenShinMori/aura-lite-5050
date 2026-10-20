@@ -147,4 +147,4 @@ While AURA-LITE-5050 incorporates strict VID:PID allowlists, boundary clamping, 
 
 ---
 
-## This project was vibecoded via antigravity cli using Gemini Argon 4 high.
+> **This project was vibecoded via antigravity cli using Gemini Argon 4 high.** 
