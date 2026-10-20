@@ -144,3 +144,7 @@ All product names, logos, brands, trademarks, and registered trademarks—includ
 **COMMUNICATING DIRECTLY WITH HARDWARE EEPROM / NVRAM REGISTERS CARRIES INHERENT RISK.**
 
 While AURA-LITE-5050 incorporates strict VID:PID allowlists, boundary clamping, and safety guardrails, this software is provided **"AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED**, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, hardware malfunction, firmware bricking, or other liability arising from the use of this software.
+
+---
+
+## This project was vibecoded via antigravity cli using Gemini Argon 4 high.
