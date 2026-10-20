@@ -1,0 +1,25 @@
+### [AURA-LITE-5050](Home)
+
+- **[Home](Home)**
+  - Core Philosophy
+  - Feature Overview
+  - Quick Start & CLI
+- **[USB HID Protocol Reference](USB-HID-Protocol-Reference)**
+  - Motherboard (B550-F Direct Mode `0x40`)
+  - Autonomous Effects (`0x35`/`0x36`)
+  - Motherboard NVRAM Commit (`0x3F 0x55`)
+  - Mouse Omni Receiver (`0x1ACE`)
+  - Signature Probe & Battery Query
+  - Palm Logo RGB Lighting (`0x51 0x28`)
+  - DPI Stages, Polling & Sleep Timeout
+  - Mouse Flash Persistence (`0x50 0x03`)
+- **[Security & Safety Architecture](Security-and-Hardware-Safety-Architecture)**
+  - Hardware Guardrails & Safety
+  - Anti-CSRF & Localhost Protection
+  - DNS Rebinding Protection
+  - Privacy & Serial Number Masking
+- **[Adding New Hardware](Adding-New-Hardware)**
+  - USB Endpoint Scanning
+  - Mock Mode Testing
+  - Adding Motherboard & Mouse PIDs
+  - Test Suite Validation

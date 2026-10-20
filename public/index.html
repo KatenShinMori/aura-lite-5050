@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA-LITE-5050 | Zero-Bloat Hardware Controller</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='20' y='20' width='60' height='60' rx='12' fill='%23121318' stroke='%2300e5a3' stroke-width='6'/><polygon points='54,30 40,50 49,50 44,70 60,47 51,47' fill='%23ff003f'/></svg>">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-group">
+        <div class="hardware-icon">
+          <svg viewBox="0 0 100 100" class="hardware-svg" xmlns="http://www.w3.org/2000/svg">
+            <rect x="25" y="25" width="50" height="50" rx="10" fill="#161822" stroke="#00e5a3" stroke-width="4"/>
+            <!-- Pins -->
+            <line x1="35" y1="12" x2="35" y2="25" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="50" y1="12" x2="50" y2="25" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="65" y1="12" x2="65" y2="25" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="35" y1="75" x2="35" y2="88" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="50" y1="75" x2="50" y2="88" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="65" y1="75" x2="65" y2="88" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="12" y1="35" x2="25" y2="35" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="12" y1="50" x2="25" y2="50" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="12" y1="65" x2="25" y2="65" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="75" y1="35" x2="88" y2="35" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="75" y1="50" x2="88" y2="50" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <line x1="75" y1="65" x2="88" y2="65" stroke="#00d4ff" stroke-width="4" stroke-linecap="round"/>
+            <!-- Lightning Core -->
+            <polygon points="53,33 41,51 49,51 45,67 59,48 51,48" fill="#ff003f"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="glitch-title" data-text="AURA-LITE-5050">AURA-LITE-5050</h1>
+          <p class="subtitle">Zero-Bloat On-Demand Hardware Controller · 127.0.0.1:5050</p>
+        </div>
+      </div>
+
+      <!-- System Status Badges -->
+      <div class="status-bar">
+        <div class="badge" id="mb-badge">
+          <span class="indicator green"></span>
+          <span class="badge-text" id="mb-badge-text">Motherboard: Probing...</span>
+        </div>
+        <div class="badge" id="mouse-badge">
+          <span class="indicator green"></span>
+          <span class="badge-text" id="mouse-badge-text">Mouse: Probing...</span>
+        </div>
+        <div class="badge battery-badge" id="battery-badge">
+          <span class="batt-icon" id="batt-icon">⚡</span>
+          <span id="battery-text">--%</span>
+        </div>
+        <button class="btn btn-sm btn-outline" id="btn-show-debug" title="View USB HID diagnostics">🔍 HID Debug</button>
+        <button class="btn btn-sm btn-outline" id="btn-refresh-status" title="Refresh hardware state">⟳ Sync</button>
+      </div>
+    </header>
+
+    <!-- Mock Alert Banner -->
+    <div class="mock-alert-banner hidden" id="mock-alert-banner">
+      <span id="mock-alert-text">Warning: Hardware running in simulated fallback mode.</span>
+      <button class="btn btn-sm btn-outline" id="btn-banner-debug">Inspect HID Endpoints</button>
+    </div>
+
+    <!-- Main Grid -->
+    <main class="main-grid">
+      
+      <!-- Panel 1: Motherboard (B550-F Gaming Aura) -->
+      <section class="card glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-icon">🖳</span>
+            <h2>ROG STRIX B550-F GAMING</h2>
+          </div>
+          <span class="chip chip-crimson" id="mb-chip">PID 0x19AF / 0x1939</span>
+        </div>
+
+        <div class="card-body">
+          <!-- Architecture Switcher: Direct Mode vs Hardware Effects -->
+          <div class="form-group">
+            <label class="section-label">AURA CONTROL ARCHITECTURE</label>
+            <div class="control-arch-switch">
+              <button class="arch-btn active" id="btn-arch-direct" data-arch="direct">
+                <span class="arch-title">Direct Mode (0x40)</span>
+                <span class="arch-desc">Dedicated ROG Shroud Logo + Headers Separated</span>
+              </button>
+              <button class="arch-btn" id="btn-arch-effect" data-arch="effect">
+                <span class="arch-title">Hardware Effects (0x35/0x36)</span>
+                <span class="arch-desc">Autonomous Firmware Effects + NVRAM Persist</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- DIRECT MODE CONTROLS (Active by default) -->
+          <div id="direct-controls-panel" class="direct-controls-container">
+            <!-- Zone 1: Built-in ROG I/O Shroud Logo -->
+            <div class="zone-panel highlight-zone">
+              <div class="zone-header">
+                <div class="zone-title-group">
+                  <span class="card-icon">⚡</span>
+                  <span class="zone-title">BUILT-IN ROG I/O SHROUD LOGO (5x Onboard ARGB)</span>
+                </div>
+                <div class="sub-toggle-switch">
+                  <button class="sub-toggle-btn active" id="btn-logo-unified" data-logo-mode="unified">Unified Color</button>
+                  <button class="sub-toggle-btn" id="btn-logo-gradient" data-logo-mode="gradient">Per-LED Gradient</button>
+                </div>
+              </div>
+
+              <!-- Unified Logo Color -->
+              <div id="logo-unified-box" class="color-picker-row">
+                <input type="color" id="logo-unified-picker" value="#ff0000" class="color-swatch-input">
+                <input type="text" id="logo-unified-hex" value="#FF0000" class="hex-text-input" maxlength="7">
+                <div class="preset-colors">
+                  <button class="preset-btn" style="--c: #ff0000" data-hex="#ff0000" data-target="logo-unified" title="Pure Red"></button>
+                  <button class="preset-btn" style="--c: #ff003f" data-hex="#ff003f" data-target="logo-unified" title="ROG Crimson"></button>
+                  <button class="preset-btn" style="--c: #00e5a3" data-hex="#00e5a3" data-target="logo-unified" title="Cyber Mint"></button>
+                  <button class="preset-btn" style="--c: #00d4ff" data-hex="#00d4ff" data-target="logo-unified" title="Neon Cyan"></button>
+                  <button class="preset-btn" style="--c: #9d00ff" data-hex="#9d00ff" data-target="logo-unified" title="Electric Purple"></button>
+                  <button class="preset-btn" style="--c: #ffb700" data-hex="#ffb700" data-target="logo-unified" title="Amber Flare"></button>
+                  <button class="preset-btn" style="--c: #ffffff" data-hex="#ffffff" data-target="logo-unified" title="Pure White"></button>
+                </div>
+              </div>
+
+              <!-- Logo Direct Brightness Slider -->
+              <div class="brightness-slider-group mt-sm">
+                <span class="slider-label">Direct Brightness: <strong id="logo-brightness-val">100%</strong></span>
+                <input type="range" id="logo-brightness" min="0" max="100" value="100" step="5" class="slider-input">
+              </div>
+
+              <!-- Per-LED Gradient Grid -->
+              <div id="logo-gradient-box" class="form-group hidden">
+                <div class="led-gradient-grid">
+                  <div class="led-slot">
+                    <span class="led-slot-label">LED 1 (Wing)</span>
+                    <input type="color" class="led-slot-color" id="logo-led-0" value="#ff0000">
+                    <span class="led-slot-hex" id="logo-led-hex-0">#FF0000</span>
+                  </div>
+                  <div class="led-slot">
+                    <span class="led-slot-label">LED 2 (Eye)</span>
+                    <input type="color" class="led-slot-color" id="logo-led-1" value="#ff0080">
+                    <span class="led-slot-hex" id="logo-led-hex-1">#FF0080</span>
+                  </div>
+                  <div class="led-slot">
+                    <span class="led-slot-label">LED 3 (Mid)</span>
+                    <input type="color" class="led-slot-color" id="logo-led-2" value="#9d00ff">
+                    <span class="led-slot-hex" id="logo-led-hex-2">#9D00FF</span>
+                  </div>
+                  <div class="led-slot">
+                    <span class="led-slot-label">LED 4 (Edge)</span>
+                    <input type="color" class="led-slot-color" id="logo-led-3" value="#00d4ff">
+                    <span class="led-slot-hex" id="logo-led-hex-3">#00D4FF</span>
+                  </div>
+                  <div class="led-slot">
+                    <span class="led-slot-label">LED 5 (Tail)</span>
+                    <input type="color" class="led-slot-color" id="logo-led-4" value="#00e5a3">
+                    <span class="led-slot-hex" id="logo-led-hex-4">#00E5A3</span>
+                  </div>
+                </div>
+
+                <div class="gradient-presets-row mt-sm">
+                  <span class="slider-label">Quick Gradients:</span>
+                  <button class="gradient-chip" data-gradient="cyberpunk">Cyberpunk (Crimson → Cyan)</button>
+                  <button class="gradient-chip" data-gradient="sunset">Sunset (Crimson → Gold)</button>
+                  <button class="gradient-chip" data-gradient="aurora">Aurora (Mint → Purple)</button>
+                  <button class="gradient-chip" data-gradient="fire">Fire (Crimson → Orange)</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- External RGB Headers Collapsed Accordion (Headers 1, 2, ADD_GEN2) -->
+            <details class="external-headers-accordion">
+              <summary class="accordion-summary">External RGB Headers (Unplugged)</summary>
+              <div class="accordion-content">
+                <!-- Zone 2: 12V RGB Header 1 -->
+                <div class="zone-panel">
+                  <div class="zone-header">
+                    <span class="zone-title">12V RGB HEADER 1 (4-pin RGB_HEADER1 · Ch 0x04 Direct)</span>
+                  </div>
+                  <div class="color-picker-row">
+                    <input type="color" id="header1-picker" value="#00e5a3" class="color-swatch-input">
+                    <input type="text" id="header1-hex" value="#00E5A3" class="hex-text-input" maxlength="7">
+                    <div class="preset-colors">
+                      <button class="preset-btn" style="--c: #ff0000" data-hex="#ff0000" data-target="header1" title="Pure Red"></button>
+                      <button class="preset-btn" style="--c: #ff003f" data-hex="#ff003f" data-target="header1" title="ROG Crimson"></button>
+                      <button class="preset-btn" style="--c: #00e5a3" data-hex="#00e5a3" data-target="header1" title="Cyber Mint"></button>
+                      <button class="preset-btn" style="--c: #00d4ff" data-hex="#00d4ff" data-target="header1" title="Neon Cyan"></button>
+                      <button class="preset-btn" style="--c: #9d00ff" data-hex="#9d00ff" data-target="header1" title="Electric Purple"></button>
+                      <button class="preset-btn" style="--c: #ffb700" data-hex="#ffb700" data-target="header1" title="Amber Flare"></button>
+                      <button class="preset-btn" style="--c: #ffffff" data-hex="#ffffff" data-target="header1" title="Pure White"></button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Zone 3: 12V RGB Header 2 -->
+                <div class="zone-panel">
+                  <div class="zone-header">
+                    <span class="zone-title">12V RGB HEADER 2 (4-pin RGB_HEADER2 · Ch 0x04 Direct)</span>
+                  </div>
+                  <div class="color-picker-row">
+                    <input type="color" id="header2-picker" value="#00d4ff" class="color-swatch-input">
+                    <input type="text" id="header2-hex" value="#00D4FF" class="hex-text-input" maxlength="7">
+                    <div class="preset-colors">
+                      <button class="preset-btn" style="--c: #ff0000" data-hex="#ff0000" data-target="header2" title="Pure Red"></button>
+                      <button class="preset-btn" style="--c: #ff003f" data-hex="#ff003f" data-target="header2" title="ROG Crimson"></button>
+                      <button class="preset-btn" style="--c: #00e5a3" data-hex="#00e5a3" data-target="header2" title="Cyber Mint"></button>
+                      <button class="preset-btn" style="--c: #00d4ff" data-hex="#00d4ff" data-target="header2" title="Neon Cyan"></button>
+                      <button class="preset-btn" style="--c: #9d00ff" data-hex="#9d00ff" data-target="header2" title="Electric Purple"></button>
+                      <button class="preset-btn" style="--c: #ffb700" data-hex="#ffb700" data-target="header2" title="Amber Flare"></button>
+                      <button class="preset-btn" style="--c: #ffffff" data-hex="#ffffff" data-target="header2" title="Pure White"></button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Zone 4: 5V ARGB Gen 2 Header -->
+                <div class="zone-panel">
+                  <div class="zone-header">
+                    <span class="zone-title">5V ARGB GEN 2 HEADER (3-pin ADD_GEN2 · Ch 0x00 Direct)</span>
+                  </div>
+                  <div class="color-picker-row">
+                    <input type="color" id="argb2-picker" value="#9d00ff" class="color-swatch-input">
+                    <input type="text" id="argb2-hex" value="#9D00FF" class="hex-text-input" maxlength="7">
+                    <div class="preset-colors">
+                      <button class="preset-btn" style="--c: #ff0000" data-hex="#ff0000" data-target="argb2" title="Pure Red"></button>
+                      <button class="preset-btn" style="--c: #ff003f" data-hex="#ff003f" data-target="argb2" title="ROG Crimson"></button>
+                      <button class="preset-btn" style="--c: #00e5a3" data-hex="#00e5a3" data-target="argb2" title="Cyber Mint"></button>
+                      <button class="preset-btn" style="--c: #00d4ff" data-hex="#00d4ff" data-target="argb2" title="Neon Cyan"></button>
+                      <button class="preset-btn" style="--c: #9d00ff" data-hex="#9d00ff" data-target="argb2" title="Electric Purple"></button>
+                      <button class="preset-btn" style="--c: #ffb700" data-hex="#ffb700" data-target="argb2" title="Amber Flare"></button>
+                      <button class="preset-btn" style="--c: #ffffff" data-hex="#ffffff" data-target="argb2" title="Pure White"></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <!-- Action Buttons for Direct Mode -->
+            <div class="action-row">
+              <button class="btn btn-primary" id="btn-apply-direct">Apply Direct Lighting (0x40)</button>
+              <button class="btn btn-outline" id="btn-commit-mb" title="Saves current hardware state to NVRAM">Commit NVRAM (0x3F 0x55)</button>
+            </div>
+          </div>
+
+          <!-- HARDWARE EFFECT CONTROLS (Hidden when direct mode active) -->
+          <div id="effect-controls-panel" class="effect-controls-container hidden">
+            <!-- Channel Selector -->
+            <div class="form-group">
+              <label class="section-label">AURA CHANNEL</label>
+              <div class="tab-switch">
+                <button class="tab-btn active" data-channel="0">
+                  <span class="tab-title">Channel 0x00</span>
+                  <span class="tab-desc">I/O Shroud Logo & 12V RGB (Headers 1 & 2)</span>
+                </button>
+                <button class="tab-btn" data-channel="1">
+                  <span class="tab-title">Channel 0x01</span>
+                  <span class="tab-desc">5V ARGB Gen 2 Header (ADD_GEN2)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Effect Mode Selector -->
+            <div class="form-group">
+              <label class="section-label">AUTONOMOUS HARDWARE EFFECT (0x35 + 0x36)</label>
+              <div class="modes-grid" id="mb-modes">
+                <button class="mode-btn active" data-mode="1">Static (0x01)</button>
+                <button class="mode-btn" data-mode="2">Breathing (0x02)</button>
+                <button class="mode-btn" data-mode="3">Color Cycle (0x03)</button>
+                <button class="mode-btn" data-mode="4">Rainbow (0x04)</button>
+                <button class="mode-btn" data-mode="5">Starry Night (0x05)</button>
+                <button class="mode-btn" data-mode="6">Comet (0x06)</button>
+              </div>
+            </div>
+
+            <!-- Color Picker -->
+            <div class="form-group" id="mb-color-group">
+              <label class="section-label">EFFECT COLOR</label>
+              <div class="color-picker-row">
+                <input type="color" id="mb-color-picker" value="#ff0000" class="color-swatch-input">
+                <input type="text" id="mb-color-hex" value="#FF0000" class="hex-text-input" maxlength="7">
+                <div class="preset-colors">
+                  <button class="preset-btn" style="--c: #ff0000" data-hex="#ff0000" data-target="mb-effect" title="Pure Red"></button>
+                  <button class="preset-btn" style="--c: #ff003f" data-hex="#ff003f" data-target="mb-effect" title="ROG Crimson"></button>
+                  <button class="preset-btn" style="--c: #00e5a3" data-hex="#00e5a3" data-target="mb-effect" title="Cyber Mint"></button>
+                  <button class="preset-btn" style="--c: #00d4ff" data-hex="#00d4ff" data-target="mb-effect" title="Neon Cyan"></button>
+                  <button class="preset-btn" style="--c: #9d00ff" data-hex="#9d00ff" data-target="mb-effect" title="Electric Purple"></button>
+                  <button class="preset-btn" style="--c: #ffb700" data-hex="#ffb700" data-target="mb-effect" title="Amber Flare"></button>
+                  <button class="preset-btn" style="--c: #ffffff" data-hex="#ffffff" data-target="mb-effect" title="Pure White"></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Effect Speed & Brightness -->
+            <div class="settings-two-col">
+              <div class="form-group">
+                <label class="section-label">ANIMATION SPEED</label>
+                <select id="mb-speed-select" class="select-input">
+                  <option value="0" selected>Normal / Default (0x00)</option>
+                  <option value="1">Fast (0x01)</option>
+                  <option value="2">Medium (0x02)</option>
+                  <option value="3">Slow (0x03)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="section-label">BRIGHTNESS (Software Scaled)</label>
+                <div class="brightness-slider-group">
+                  <span class="slider-label">Level: <strong id="mb-brightness-val">100%</strong></span>
+                  <input type="range" id="mb-brightness" min="0" max="100" value="100" step="5" class="slider-input">
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons for Effect Mode -->
+            <div class="action-row">
+              <button class="btn btn-primary" id="btn-apply-mb">Apply Hardware Effect (0x35 + 0x36)</button>
+              <button class="btn btn-outline" id="btn-commit-mb-effect" title="Saves effect to onboard EEPROM">Commit NVRAM (0x3F 0x55)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panel 2: Mouse (Gladius III AimPoint & Omni Receiver) -->
+      <section class="card glass-card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="card-icon">🖰</span>
+            <h2>ROG GLADIUS III AIMPOINT</h2>
+          </div>
+          <span class="chip chip-cyan" id="mouse-chip">Auto Interface Routing</span>
+        </div>
+
+        <div class="card-body">
+          <!-- Connection & Battery Status -->
+          <div class="mouse-status-bar">
+            <div class="stat-item">
+              <div class="stat-header-flex">
+                <span class="stat-label">Connection Mode</span>
+                <button class="btn btn-xs btn-outline active" id="btn-toggle-mask-serial" title="Toggle masking serial number for screenshots">Mask SN: ON</button>
+              </div>
+              <span class="stat-value" id="mouse-conn-mode">ASUS ROG Omni Receiver (Report ID: 0x03)</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Battery Level</span>
+              <div class="battery-meter-container">
+                <div class="battery-meter-bar" id="battery-fill" style="width: 85%;"></div>
+                <span class="battery-pct-label" id="battery-label">85% (Awake)</span>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline" id="btn-query-batt">Query Battery</button>
+          </div>
+
+          <!-- RGB Lighting Zone (Palm Logo 0x00) -->
+          <div class="form-group">
+            <label class="section-label">PALM LOGO RGB ZONE (0x00)</label>
+            <div class="modes-grid-compact" id="mouse-lighting-modes">
+              <button class="mode-btn active" data-mouse-mode="0">Static (0x00)</button>
+              <button class="mode-btn" data-mouse-mode="1">Breathing (0x01)</button>
+              <button class="mode-btn" data-mouse-mode="2">Color Cycle (0x02)</button>
+              <button class="mode-btn" data-mouse-mode="3">Rainbow (0x03)</button>
+              <button class="mode-btn" data-mouse-mode="4">Reactive (0x04)</button>
+              <button class="mode-btn" data-mouse-mode="5">Comet (0x05)</button>
+              <button class="mode-btn" data-mouse-mode="6">Battery Mode (0x06)</button>
+            </div>
+
+            <div class="color-picker-row mt-sm">
+              <input type="color" id="mouse-color-picker" value="#ff0000" class="color-swatch-input">
+              <input type="text" id="mouse-color-hex" value="#FF0000" class="hex-text-input" maxlength="7">
+              <div class="brightness-slider-group">
+                <span class="slider-label">Brightness: <strong id="brightness-val">100%</strong></span>
+                <input type="range" id="mouse-brightness" min="0" max="100" value="100" step="5" class="slider-input">
+              </div>
+            </div>
+
+            <div class="preset-colors mt-xs">
+              <button class="preset-btn" style="--c: #ff0000" data-hex="#ff0000" data-target="mouse" title="Pure Red"></button>
+              <button class="preset-btn" style="--c: #ff003f" data-hex="#ff003f" data-target="mouse" title="ROG Crimson"></button>
+              <button class="preset-btn" style="--c: #00e5a3" data-hex="#00e5a3" data-target="mouse" title="Cyber Mint"></button>
+              <button class="preset-btn" style="--c: #00d4ff" data-hex="#00d4ff" data-target="mouse" title="Neon Cyan"></button>
+              <button class="preset-btn" style="--c: #9d00ff" data-hex="#9d00ff" data-target="mouse" title="Electric Purple"></button>
+              <button class="preset-btn" style="--c: #ffb700" data-hex="#ffb700" data-target="mouse" title="Amber Flare"></button>
+              <button class="preset-btn" style="--c: #ffffff" data-hex="#ffffff" data-target="mouse" title="Pure White"></button>
+            </div>
+          </div>
+
+          <!-- 4 DPI Stages -->
+          <div class="form-group">
+            <label class="section-label">4 DPI STAGES (100 - 36,000 DPI)</label>
+            <div class="dpi-stages-container">
+              
+              <!-- Stage 1 -->
+              <div class="dpi-stage-box active" data-stage="0">
+                <div class="dpi-header">
+                  <span class="dpi-stage-title">STAGE 1</span>
+                  <input type="color" class="dpi-color-input" id="dpi-color-0" value="#ff0000">
+                </div>
+                <div class="dpi-val-display" id="dpi-val-0">400 DPI</div>
+                <input type="range" class="dpi-slider" id="dpi-slider-0" min="100" max="36000" step="50" value="400">
+              </div>
+
+              <!-- Stage 2 -->
+              <div class="dpi-stage-box" data-stage="1">
+                <div class="dpi-header">
+                  <span class="dpi-stage-title">STAGE 2</span>
+                  <input type="color" class="dpi-color-input" id="dpi-color-1" value="#0080ff">
+                </div>
+                <div class="dpi-val-display" id="dpi-val-1">800 DPI</div>
+                <input type="range" class="dpi-slider" id="dpi-slider-1" min="100" max="36000" step="50" value="800">
+              </div>
+
+              <!-- Stage 3 -->
+              <div class="dpi-stage-box" data-stage="2">
+                <div class="dpi-header">
+                  <span class="dpi-stage-title">STAGE 3</span>
+                  <input type="color" class="dpi-color-input" id="dpi-color-2" value="#00ff80">
+                </div>
+                <div class="dpi-val-display" id="dpi-val-2">1600 DPI</div>
+                <input type="range" class="dpi-slider" id="dpi-slider-2" min="100" max="36000" step="50" value="1600">
+              </div>
+
+              <!-- Stage 4 -->
+              <div class="dpi-stage-box" data-stage="3">
+                <div class="dpi-header">
+                  <span class="dpi-stage-title">STAGE 4</span>
+                  <input type="color" class="dpi-color-input" id="dpi-color-3" value="#ffff00">
+                </div>
+                <div class="dpi-val-display" id="dpi-val-3">3200 DPI</div>
+                <input type="range" class="dpi-slider" id="dpi-slider-3" min="100" max="36000" step="50" value="3200">
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Polling Rate & Sleep Timeout -->
+          <div class="settings-two-col">
+            <div class="form-group">
+              <label class="section-label">POLLING RATE</label>
+              <select id="polling-rate-select" class="select-input">
+                <option value="125">125 Hz (0x00)</option>
+                <option value="250">250 Hz (0x01)</option>
+                <option value="500">500 Hz (0x02)</option>
+                <option value="1000" selected>1000 Hz (0x03 - Gaming)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="section-label">WIRELESS SLEEP TIMEOUT</label>
+              <select id="sleep-timeout-select" class="select-input">
+                <option value="1">1 Minute (0x00)</option>
+                <option value="2">2 Minutes (0x01)</option>
+                <option value="3" selected>3 Minutes (0x02 - Default)</option>
+                <option value="5">5 Minutes (0x03)</option>
+                <option value="10">10 Minutes (0x04)</option>
+                <option value="0">Never Sleep (0xFF)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Mouse Actions -->
+          <div class="action-row">
+            <button class="btn btn-cyan" id="btn-apply-mouse">Apply Mouse Settings</button>
+            <button class="btn btn-outline" id="btn-commit-mouse" title="Flush to onboard mouse memory">Save Onboard (0x50 0x03)</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Live 65-Byte HID Hex Packet Inspector -->
+    <section class="card glass-card hex-inspector-card">
+      <div class="card-header inspector-header">
+        <div class="card-title">
+          <span class="card-icon">⚡</span>
+          <h3>LIVE 65-BYTE USB HID PACKET INSPECTOR</h3>
+        </div>
+        <div class="inspector-controls">
+          <span class="packet-count" id="packet-count-badge">Packets: 0</span>
+          <button class="btn btn-sm btn-ghost" id="btn-clear-inspector">Clear</button>
+        </div>
+      </div>
+      <div class="inspector-body">
+        <div class="last-packet-meta" id="last-packet-meta">
+          <span class="meta-label">LAST PACKET:</span>
+          <span class="meta-target" id="pkt-target">None</span> · 
+          <span class="meta-desc" id="pkt-desc">Waiting for hardware interaction...</span>
+        </div>
+        <div class="hex-grid-container" id="hex-grid-container">
+          <div class="hex-empty-state">No HID packets recorded yet. Toggle an RGB mode or change DPI.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Big Hero Action: Commit to Hardware NVRAM & Terminate Utility -->
+    <div class="hero-kill-section">
+      <button class="btn-hero-kill" id="btn-commit-and-exit">
+        <span class="kill-icon">💾⚡</span>
+        <div class="kill-text-block">
+          <span class="kill-primary">COMMIT TO HARDWARE NVRAM & KILL CONTROLLER</span>
+          <span class="kill-secondary">Persists all settings across reboot/shutdown and leaves ZERO background RAM/processes</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Self-Termination Modal -->
+    <div class="modal-overlay hidden" id="kill-modal">
+      <div class="modal-card">
+        <div class="modal-glow"></div>
+        <div class="modal-icon">✓</div>
+        <h2>HARDWARE NVRAM COMMITTED</h2>
+        <p class="modal-desc">
+          Packets <code>[0xEC, 0x3F, 0x55]</code> and <code>[0x50, 0x03]</code> were written directly to hardware EEPROM/NVRAM.
+        </p>
+        <div class="modal-info-box">
+          <div class="modal-info-row">
+            <span>Server Process Status:</span>
+            <strong class="text-green">TERMINATED (0% RAM / 0 CPU)</strong>
+          </div>
+          <div class="modal-info-row">
+            <span>Hardware Persistence:</span>
+            <strong class="text-cyan">ACTIVE ON NEXT REBOOT</strong>
+          </div>
+        </div>
+        <p class="modal-footnote">You can now safely close this browser window.</p>
+        <button class="btn btn-primary" onclick="window.close()">Close Window</button>
+      </div>
+    </div>
+
+    <!-- USB HID Debug Diagnostics Modal -->
+    <div class="modal-overlay hidden" id="debug-modal">
+      <div class="modal-card debug-modal-card">
+        <div class="modal-header">
+          <h3>USB HID HARDWARE DIAGNOSTICS (/api/debug-hid)</h3>
+          <button class="btn btn-sm btn-ghost" id="btn-close-debug">✕</button>
+        </div>
+        <div class="debug-modal-content" id="debug-modal-content">
+          Loading hardware enumeration...
+        </div>
+        <div class="action-row" style="justify-content: flex-end;">
+          <button class="btn btn-sm btn-outline" id="btn-refresh-debug">Refresh HID Tree</button>
+          <button class="btn btn-sm btn-primary" id="btn-modal-close-debug">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subtle Legal & Non-Affiliation Footer -->
+    <footer class="app-footer">
+      <p>Independent open-source hardware controller. Not affiliated with or endorsed by ASUSTeK Computer Inc.</p>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

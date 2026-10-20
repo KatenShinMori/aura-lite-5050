@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+package-lock.json.bak
+
+# Build & Runtime Artifacts
+*.exe
+*.dll
+*.sys
+*.cat
+*.bin
+*.hex
+*.dump
+*.dmp
+*.profile
+*.lighting
+*.tmp
+*.bak
+*.swp
+AntigravityCLI.exe
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Credentials
+.env
+.env.*
+!.env.example
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# System & OS Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# IDE & Editor Directories
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace

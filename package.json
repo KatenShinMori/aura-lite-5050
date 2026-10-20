@@ -1,0 +1,27 @@
+{
+  "name": "aura-lite-5050",
+  "version": "1.0.0",
+  "description": "Zero-bloat on-demand local web controller for Aura and compatible hardware",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "scan": "node -e \"import('./hid/deviceManager.js').then(m => m.scanDevices(true))\"",
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "rog",
+    "asus",
+    "armoury-crate-replacement",
+    "hid",
+    "b550-f",
+    "gladius-iii",
+    "omni-receiver"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "node-hid": "^3.4.0"
+  }
+}
